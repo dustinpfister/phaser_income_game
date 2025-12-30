@@ -92,31 +92,6 @@ const format_cash = function(cash=0, chars=19){
     return formatter.format(cash).padStart(chars, '.');
 };
 
-const update = function(){
-    const now = new Date();
-    let i_ac = 0;
-    const len_ac = state.auto_clickers.length;
-    while(i_ac < len_ac){
-        const ac = state.auto_clickers[i_ac];
-        const lt = new Date( ac.last_update ).getTime();
-        const ms = now.getTime() - lt;
-        ac.per = ms / ac.time;
-        if(ac.per >= 1){
-            ac.last_update = now.getTime() - ( ac.per % 1 ) * ac.time;
-            const per = Math.floor( ac.per );
-            update_click_rate(state, ac.rate, ac.clicks * per);
-            ac.per = 1;
-            
-        }
-        i_ac += 1;
-    }
-    state.cash = tabulate_clicks(state);
-    state.cash = clamp_cash(state.cash);
-    
-    localStorage.setItem('income_game_save', JSON.stringify( state ) );
-    
-};
-
 class Boot extends Phaser.Scene {
 
     constructor (config) {
@@ -151,10 +126,8 @@ class Boot extends Phaser.Scene {
         
     }
     
-    update_auto_clickers () {
-    
+    render_auto_clickers () {
         const state2 = this;
-        
         const bar_width = 100;
         const bar_height = 25;
         const spacing = 10;
@@ -187,14 +160,41 @@ class Boot extends Phaser.Scene {
             text.setDropShadow(1, 1, 0x2a2a2a, 1);
             i += 1;
         }
+    }
     
+    update_auto_clickers () {
+    
+        const now = new Date();
+        let i_ac = 0;
+        const len_ac = state.auto_clickers.length;
+        while(i_ac < len_ac){
+            const ac = state.auto_clickers[i_ac];
+            const lt = new Date( ac.last_update ).getTime();
+            const ms = now.getTime() - lt;
+            ac.per = ms / ac.time;
+            if(ac.per >= 1){
+                ac.last_update = now.getTime() - ( ac.per % 1 ) * ac.time;
+                const per = Math.floor( ac.per );
+                update_click_rate(state, ac.rate, ac.clicks * per);
+                ac.per = 1;
+            
+            }
+            i_ac += 1;
+        }
     
     }
     
     update () {
     
-        update();
         this.update_auto_clickers();
+        
+        state.cash = tabulate_clicks(state);
+        state.cash = clamp_cash(state.cash);
+    
+        localStorage.setItem('income_game_save', JSON.stringify( state ) );
+        
+        
+        this.render_auto_clickers();
      
     }
         
