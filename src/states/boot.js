@@ -108,10 +108,18 @@ class Boot extends Phaser.Scene {
     }
 
     create () {
+        const font_size = 25;
+        
+        // create main display objects
+        const gr_main = this.add.graphics();
+        gr_main.setName('graph_main');
+        const line_main = this.add.bitmapText( 0, 0, 'min_3px_5px', '', font_size);
+        line_main.setName('text_main');
+        line_main.setScrollFactor(0, 0);
+        
         // create auto_clicker display objects
         const bar_width = 150;
         const bar_height = 25;
-        const font_size = 25;
         const max = 10;
         let i = 0, x=0, y=0;
         while(i < max){
@@ -121,9 +129,21 @@ class Boot extends Phaser.Scene {
             line.setName('ac_text_' + i);
             line.setScrollFactor(0, 0);
             i += 1;
-        }
-
-        
+        }    
+    }
+    
+    render_main () {
+        const graph = this.children.getByName('graph_main');
+        graph.fillStyle(0xafafaf);
+        graph.fillRect(0, 0, 300, 50);
+        graph.x = 25;
+        graph.y = 25;
+        const text = this.children.getByName('text_main');
+        text.x = 25;
+        text.y = 30;
+        text.text = format_cash(state.cash, 15);
+        text.setCharacterTint(0, text.text.length, true, 0xffffff);  
+        text.setDropShadow(1, 1, 0x2a2a2a, 1);
     }
     
     render_auto_clickers () {
@@ -132,7 +152,7 @@ class Boot extends Phaser.Scene {
         const bar_height = 25;
         const spacing = 10;
         const max = 10;
-        const start_x = 25, start_y = 50;
+        const start_x = 25, start_y = 85;
         let i = 0;
         while(i < max){
             const ac = state.auto_clickers[i];
@@ -155,7 +175,7 @@ class Boot extends Phaser.Scene {
             graph.fillRect(0, 0, w, bar_height);
             graph.strokeRect(0, 0, w, bar_height);
             
-            text.text = format_cash( ac.rate, 7 ) + ' ' + format_cash( get_per_hour( ac), 7 ) + '/hour';
+            text.text = format_cash( ac.rate, 10 ) + ' ' + format_cash( get_per_hour( ac), 10 ) + '/hour';
             text.setCharacterTint(0, text.text.length, true, 0xffffff);  
             text.setDropShadow(1, 1, 0x2a2a2a, 1);
             i += 1;
@@ -186,16 +206,17 @@ class Boot extends Phaser.Scene {
     
     update () {
     
-        this.update_auto_clickers();
-        
+        this.update_auto_clickers();       
         state.cash = tabulate_clicks(state);
         state.cash = clamp_cash(state.cash);
     
         localStorage.setItem('income_game_save', JSON.stringify( state ) );
         
         
+        this.render_main();
         this.render_auto_clickers();
-     
+        
+        
     }
         
 }
