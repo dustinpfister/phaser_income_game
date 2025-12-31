@@ -12,11 +12,11 @@ const create_state = ( date = new Date() ) => {
         manual_rate_index: 0,
         auto_clickers: [
         
-            { clicks: 1, rate:   0.01, time:      10000, per: 0, last_update: date.getTime() },
-            { clicks: 1, rate:   0.25, time:     100000, per: 0, last_update: date.getTime() },
-            { clicks: 1, rate:   3.00, time:    1000000, per: 0, last_update: date.getTime() },
-            { clicks: 1, rate:  50.00, time:   10000000, per: 0, last_update: date.getTime() },
-            { clicks: 1, rate: 750.00, time:  100000000, per: 0, last_update: date.getTime() },
+            //{ clicks: 1, rate:   0.01, time:      10000, per: 0, last_update: date.getTime() },
+            //{ clicks: 1, rate:   0.25, time:     100000, per: 0, last_update: date.getTime() },
+            //{ clicks: 1, rate:   3.00, time:    1000000, per: 0, last_update: date.getTime() },
+            //{ clicks: 1, rate:  50.00, time:   10000000, per: 0, last_update: date.getTime() },
+            //{ clicks: 1, rate: 750.00, time:  100000000, per: 0, last_update: date.getTime() },
             
         ]
     };
@@ -92,6 +92,15 @@ const format_cash = function(cash=0, chars=19){
     return formatter.format(cash).padStart(chars, '.');
 };
 
+const set_graphics_interactive = (gr, x=0, y=0, width=128, height=64) => {
+    gr.setInteractive({
+        hitArea: { x:x, y: y, width: width, height: height},
+        hitAreaCallback : (shape, x, y) => {
+            return x >= shape.x && x < shape.x + shape.width && y >= shape.y && y < shape.y + shape.height;
+        } 
+    });
+};
+
 class Boot extends Phaser.Scene {
 
     constructor (config) {
@@ -108,6 +117,7 @@ class Boot extends Phaser.Scene {
     }
 
     create () {
+        const state2 = this;
         const font_size = 25;
         
         // create main display objects
@@ -116,6 +126,21 @@ class Boot extends Phaser.Scene {
         const line_main = this.add.bitmapText( 0, 0, 'min_3px_5px', '', font_size);
         line_main.setName('text_main');
         line_main.setScrollFactor(0, 0);
+        
+        // create manual_clicker display objects
+        const gr_ma = this.add.graphics();
+        const x2 = 640 - 128 - 25;
+        const y2 = 100;
+        gr_ma.x = x2; gr_ma.y = y2;
+        gr_ma.setName('graph_manual');
+        set_graphics_interactive(gr_ma, 0, 0, 128, 64);
+        gr_ma.on('pointerdown', ()=>{
+            state2.manual_work();
+        })
+        const line = this.add.bitmapText( 0, 0, 'min_3px_5px', 'Prefrom work', font_size );
+        line.x = x2;
+        line.y = y2;
+        line.setName('text_manual');
         
         // create auto_clicker display objects
         const bar_width = 150;
@@ -130,6 +155,12 @@ class Boot extends Phaser.Scene {
             line.setScrollFactor(0, 0);
             i += 1;
         }    
+    }
+    
+    manual_work () {
+    
+        console.log('yes this is good');
+    
     }
     
     render_main () {
@@ -182,6 +213,23 @@ class Boot extends Phaser.Scene {
         }
     }
     
+    render_manual_button () {
+    
+        // render manual button
+        const graph = this.children.getByName('graph_manual');
+        const text = this.children.getByName('text_manual');
+        graph.fillStyle(0xafafaf);
+        graph.fillRect(0, 0, 128, 64);
+        //graph.x = 640 - 128 - 25;
+        //graph.y = 100;
+        text.text = 'Manual Work';
+        text.setCharacterTint(0, text.text.length, true, 0xffffff);  
+        text.setDropShadow(1, 1, 0x2a2a2a, 1);
+        //text.x = 640 - 128 - 25 + 10;
+        //text.y = 120;     
+    
+    }
+    
     update_auto_clickers () {
     
         const now = new Date();
@@ -212,10 +260,11 @@ class Boot extends Phaser.Scene {
     
         localStorage.setItem('income_game_save', JSON.stringify( state ) );
         
-        
         this.render_main();
-        this.render_auto_clickers();
+    
+        this.render_manual_button();
         
+        this.render_auto_clickers();
         
     }
         
