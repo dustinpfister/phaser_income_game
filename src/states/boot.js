@@ -12,12 +12,17 @@ const create_state = ( date = new Date() ) => {
         manual_rate_index: 0,
         auto_clickers: [
         
-            //{ clicks: 1, rate:   0.01, time:      10000, per: 0, last_update: date.getTime() },
-            //{ clicks: 1, rate:   0.25, time:     100000, per: 0, last_update: date.getTime() },
-            //{ clicks: 1, rate:   3.00, time:    1000000, per: 0, last_update: date.getTime() },
-            //{ clicks: 1, rate:  50.00, time:   10000000, per: 0, last_update: date.getTime() },
-            //{ clicks: 1, rate: 750.00, time:  100000000, per: 0, last_update: date.getTime() },
+            { clicks: 1, rate:   0.01, time:       7500, per: 0, last_update: date.getTime() },
+            { clicks: 1, rate:   0.05, time:      20000, per: 0, last_update: date.getTime() },
+            { clicks: 1, rate:   0.10, time:      30000, per: 0, last_update: date.getTime() },
+            { clicks: 1, rate:   0.25, time:      55000, per: 0, last_update: date.getTime() },
+            { clicks: 1, rate:   1.00, time:     180000, per: 0, last_update: date.getTime() },
             
+            { clicks: 1, rate:   5.00, time:     750000, per: 0, last_update: date.getTime() },
+            { clicks: 1, rate:  10.00, time:    1250000, per: 0, last_update: date.getTime() },
+            { clicks: 1, rate:  20.00, time:    1750000, per: 0, last_update: date.getTime() }, 
+            { clicks: 1, rate:  50.00, time:    2500000, per: 0, last_update: date.getTime() }, 
+            { clicks: 1, rate: 100.00, time:    4250000, per: 0, last_update: date.getTime() }
         ]
     };
 };
@@ -64,12 +69,12 @@ const update_click_rate = (state, rate=0.10, click_delta = 1 ) => {
         rec[0] += click_delta;
     }
 };
-
+/*
 const user_click = (state) => {
     const rate = MANUAL_RATES[ state.manual_rate_index ];
     update_click_rate(state, rate, 1);
 };
-
+*/
 const tabulate_clicks = (state) => {
     return state.clicks.reduce((acc, rec) => {
         const count = rec[0], amount_per = rec[1];
@@ -159,7 +164,11 @@ class Boot extends Phaser.Scene {
     
     manual_work () {
     
-        console.log('yes this is good');
+        console.log('manual work action:');
+        const rate = MANUAL_RATES[ state.manual_rate_index ];
+        update_click_rate(state, rate, 1);
+        console.log(state);
+        console.log('');
     
     }
     

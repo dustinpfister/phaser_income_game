@@ -5,7 +5,7 @@ I have been burnt out on javaScript development for a few months now and would l
 
 ## What needs to get done
 
-* User clicks a manual income button
+* (done) User clicks a manual income button
 * The Manual income button can be upgraded
 * The user can buy auto clickers
 * each auto clicker can be upgraded
