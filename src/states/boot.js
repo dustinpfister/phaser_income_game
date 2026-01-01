@@ -114,11 +114,8 @@ class Boot extends Phaser.Scene {
     }
     
     preload(){
-    
         // FONTS
-        //this.load.bitmapFont('min', 'fonts/min.png', 'fonts/min.xml');
         this.load.bitmapFont('min_3px_5px', 'fonts/min_3px_5px.png', 'fonts/min_3px_5px.xml');
-    
     }
 
     create () {
@@ -163,13 +160,11 @@ class Boot extends Phaser.Scene {
     }
     
     manual_work () {
-    
         console.log('manual work action:');
         const rate = MANUAL_RATES[ state.manual_rate_index ];
         update_click_rate(state, rate, 1);
         console.log(state);
         console.log('');
-    
     }
     
     render_main () {
@@ -213,8 +208,7 @@ class Boot extends Phaser.Scene {
             graph.lineStyle(2, 0xffffff, 1.0);
             graph.fillStyle(0x00ff00);
             graph.fillRect(0, 0, w, bar_height);
-            graph.strokeRect(0, 0, w, bar_height);
-            
+            graph.strokeRect(0, 0, w, bar_height);   
             text.text = format_cash( ac.rate, 10 ) + ' ' + format_cash( get_per_hour( ac), 10 ) + '/hour';
             text.setCharacterTint(0, text.text.length, true, 0xffffff);  
             text.setDropShadow(1, 1, 0x2a2a2a, 1);
@@ -223,24 +217,16 @@ class Boot extends Phaser.Scene {
     }
     
     render_manual_button () {
-    
-        // render manual button
         const graph = this.children.getByName('graph_manual');
         const text = this.children.getByName('text_manual');
         graph.fillStyle(0xafafaf);
         graph.fillRect(0, 0, 128, 64);
-        //graph.x = 640 - 128 - 25;
-        //graph.y = 100;
         text.text = 'Manual Work';
         text.setCharacterTint(0, text.text.length, true, 0xffffff);  
-        text.setDropShadow(1, 1, 0x2a2a2a, 1);
-        //text.x = 640 - 128 - 25 + 10;
-        //text.y = 120;     
-    
+        text.setDropShadow(1, 1, 0x2a2a2a, 1);   
     }
     
     update_auto_clickers () {
-    
         const now = new Date();
         let i_ac = 0;
         const len_ac = state.auto_clickers.length;
@@ -254,27 +240,24 @@ class Boot extends Phaser.Scene {
                 const per = Math.floor( ac.per );
                 update_click_rate(state, ac.rate, ac.clicks * per);
                 ac.per = 1;
-            
             }
             i_ac += 1;
         }
-    
     }
     
+    lt = new Date()
     update () {
-    
-        this.update_auto_clickers();       
-        state.cash = tabulate_clicks(state);
-        state.cash = clamp_cash(state.cash);
-    
-        localStorage.setItem('income_game_save', JSON.stringify( state ) );
-        
-        this.render_main();
-    
-        this.render_manual_button();
-        
-        this.render_auto_clickers();
-        
+        const now = new Date();
+        if(now - this.lt >= 100){
+            this.update_auto_clickers();       
+            state.cash = tabulate_clicks(state);
+            state.cash = clamp_cash(state.cash);
+            localStorage.setItem('income_game_save', JSON.stringify( state ) );
+            this.render_main();
+            this.render_manual_button();
+            this.render_auto_clickers();
+            this.lt = now;
+        }
     }
         
 }
