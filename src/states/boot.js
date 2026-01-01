@@ -12,22 +12,24 @@ const create_state = ( date = new Date() ) => {
         manual_rate_index: 0,
         auto_clickers: [
         
-            { clicks: 1, rate:   0.01, time:       7500, per: 0, last_update: date.getTime() },
-            { clicks: 1, rate:   0.05, time:      20000, per: 0, last_update: date.getTime() },
-            { clicks: 1, rate:   0.10, time:      30000, per: 0, last_update: date.getTime() },
-            { clicks: 1, rate:   0.25, time:      55000, per: 0, last_update: date.getTime() },
-            { clicks: 1, rate:   1.00, time:     180000, per: 0, last_update: date.getTime() },
+            { rate:   0.01, time:       7500, per: 0, last_update: date.getTime() },
+            { rate:   0.05, time:      20000, per: 0, last_update: date.getTime() },
+            { rate:   0.10, time:      30000, per: 0, last_update: date.getTime() },
+            { rate:   0.25, time:      55000, per: 0, last_update: date.getTime() },
+            { rate:   1.00, time:     180000, per: 0, last_update: date.getTime() },
             
-            { clicks: 1, rate:   5.00, time:     750000, per: 0, last_update: date.getTime() },
-            { clicks: 1, rate:  10.00, time:    1250000, per: 0, last_update: date.getTime() },
-            { clicks: 1, rate:  20.00, time:    1750000, per: 0, last_update: date.getTime() }, 
-            { clicks: 1, rate:  50.00, time:    2500000, per: 0, last_update: date.getTime() }, 
-            { clicks: 1, rate: 100.00, time:    4250000, per: 0, last_update: date.getTime() }
+            { rate:   5.00, time:     750000, per: 0, last_update: date.getTime() },
+            { rate:  10.00, time:    1250000, per: 0, last_update: date.getTime() },
+            { rate:  20.00, time:    1750000, per: 0, last_update: date.getTime() }, 
+            { rate:  50.00, time:    2500000, per: 0, last_update: date.getTime() }, 
+            { rate: 100.00, time:    4250000, per: 0, last_update: date.getTime() }
+            
         ]
     };
 };
 
 const state_default = create_state();
+
 let state = Object.assign({}, state_default);
 
 // load state
@@ -44,7 +46,7 @@ window.reset = ( date = new Date() ) => {
 };
 
 const get_per_hour = ( ac ) => {
-    return ac.rate / ac.time * ( 1000 * 60 * 60 ) * ac.clicks;
+    return ac.rate / ac.time * ( 1000 * 60 * 60 );
 };
 
 const get_click_rec = (state, rate = 0.05 ) => {
@@ -69,19 +71,13 @@ const update_click_rate = (state, rate=0.10, click_delta = 1 ) => {
         rec[0] += click_delta;
     }
 };
-/*
-const user_click = (state) => {
-    const rate = MANUAL_RATES[ state.manual_rate_index ];
-    update_click_rate(state, rate, 1);
-};
-*/
+
 const tabulate_clicks = (state) => {
     return state.clicks.reduce((acc, rec) => {
         const count = rec[0], amount_per = rec[1];
         return acc + count * amount_per;
     }, 0);
 };
-
 
 const clamp_cash = function(cash=0, min=-99999999999.99, max=999999999999.99){
     if(cash < min){ return min; }
@@ -238,7 +234,7 @@ class Boot extends Phaser.Scene {
             if(ac.per >= 1){
                 ac.last_update = now.getTime() - ( ac.per % 1 ) * ac.time;
                 const per = Math.floor( ac.per );
-                update_click_rate(state, ac.rate, ac.clicks * per);
+                update_click_rate(state, ac.rate, per);
                 ac.per = 1;
             }
             i_ac += 1;
