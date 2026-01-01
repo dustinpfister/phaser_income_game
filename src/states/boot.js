@@ -127,11 +127,23 @@ const set_graphics_interactive = (gr, x=0, y=0, width=128, height=64) => {
     });
 };
 
+
 class Boot extends Phaser.Scene {
 
     constructor (config) {
         super(config);
         this.key = 'Boot';
+    }
+    
+    add_button ( suffix='', x=0, y=0, w=200, h=64, font_size=25 ) {
+        const gr = this.add.graphics();
+        gr.x = x; gr.y = y;
+        gr.setName('graph_' + suffix);
+        set_graphics_interactive(gr, 0, 0, w, h);
+        const line = this.add.bitmapText( x, y, 'min_3px_5px', '', font_size);
+        line.setName('text_' + suffix);
+        line.setScrollFactor(0, 0);
+        return gr;
     }
     
     preload(){
@@ -149,40 +161,18 @@ class Boot extends Phaser.Scene {
         const line_main = this.add.bitmapText( 0, 0, 'min_3px_5px', '', font_size);
         line_main.setName('text_main');
         line_main.setScrollFactor(0, 0);
-        
+            
         // create manual display objects
-        {
-            const gr_ma = this.add.graphics();
-            const x = 640 - 175 - 25;
-            const y = 100;
-            gr_ma.x = x; gr_ma.y = y;
-            gr_ma.setName('graph_manual');
-            set_graphics_interactive(gr_ma, 0, 0, 175, 64);
-            gr_ma.on('pointerdown', ()=>{
-                state2.manual_work();
-            })
-            const line = this.add.bitmapText( 0, 0, 'min_3px_5px', '', font_size );
-            line.x = x;
-            line.y = y;
-            line.setName('text_manual');
-        }
+        const gr_ma = this.add_button('manual', 640 - 175 - 25, 100, 175, 64);
+        gr_ma.on('pointerdown', ()=>{
+            state2.manual_work();
+        });
+        
         // create manual_upgrade display objects
-        {
-            const gr_ma = this.add.graphics();
-            const x = 640 - 175 - 25;
-            const y = 200;
-            gr_ma.x = x; gr_ma.y = y;
-            gr_ma.setName('graph_manual_upgrade');
-            set_graphics_interactive(gr_ma, 0, 0, 175, 64);
-            gr_ma.on('pointerdown', ()=>{
-                //console.log('yes now');
-                state2.manual_upgrade();
-            })
-            const line = this.add.bitmapText( 0, 0, 'min_3px_5px', '', font_size );
-            line.x = x;
-            line.y = y;
-            line.setName('text_manual_upgrade');
-        }
+        const gr_mu = this.add_button('manual_upgrade', 640 - 175 - 25, 200, 175, 64);
+        gr_mu.on('pointerdown', ()=>{
+            state2.manual_upgrade();
+        });
         
         // create auto_clicker display objects
         const bar_width = 150;
@@ -192,7 +182,7 @@ class Boot extends Phaser.Scene {
         while(i < max){
             const gr = this.add.graphics();
             gr.setName('ac_graph_' + i);
-            const line = this.add.bitmapText( 0, 0, 'min_3px_5px', 'foo', font_size);
+            const line = this.add.bitmapText( 0, 0, 'min_3px_5px', '', font_size);
             line.setName('ac_text_' + i);
             line.setScrollFactor(0, 0);
             i += 1;
