@@ -5,6 +5,20 @@ const MANUAL_RATES = [
     20, 25, 30, 35, 40, 45, 50, 55, 60, 64, 70, 75, 80, 85, 90, 95, 100
 ];
 
+const UPGRADES = {
+    manual : { start:      10, base: 2 },
+    ac0:     {start:     1000, base: 1.25 },
+    ac1:     {start:     5000, base: 1.50 },
+    ac2:     {start:    10000, base: 1.75 },
+    ac3:     {start:    25000, base: 2.00 },
+    ac4:     {start:    50000, base: 2.50 },
+    ac5:     {start:   100000, base: 2.75 },
+    ac6:     {start:   250000, base: 3.00 },
+    ac7:     {start:   750000, base: 3.05 },
+    ac8:     {start:  1000000, base: 3.75 },
+    ac9:     {start: 10000000, base: 4.00 }
+};
+
 const MANUAL_LEVEL_CAP = 30;
 
 const get_upgrade_cost = ( level=1, start=10, base=2 ) => {
@@ -15,25 +29,26 @@ const create_state = ( date = new Date() ) => {
     return {
         cash: 0.00,
         upgrade_costs: 0.00,
-        clicks: [],
+        clicks: [
+            [1, 12191025.55]
+        ],
         upgrades: {
-            manual: { level: 0 }
+            manual: 0,
+            ac0 : 1, ac1 : 1, ac2 : 1, ac3 : 1, ac4 : 1, ac5 : 1, ac6 : 1, ac7 : 1, ac8 : 1, ac9 : 1,
         },
-        //manual_rate_index: 0,
         auto_clickers: [
-        /*
+        
             { rate:   0.01, time:       7500, per: 0, last_update: date.getTime() },
             { rate:   0.05, time:      20000, per: 0, last_update: date.getTime() },
             { rate:   0.10, time:      30000, per: 0, last_update: date.getTime() },
             { rate:   0.25, time:      55000, per: 0, last_update: date.getTime() },
-            { rate:   1.00, time:     180000, per: 0, last_update: date.getTime() },
-            
+            { rate:   1.00, time:     180000, per: 0, last_update: date.getTime() },      
             { rate:   5.00, time:     750000, per: 0, last_update: date.getTime() },
             { rate:  10.00, time:    1250000, per: 0, last_update: date.getTime() },
             { rate:  20.00, time:    1750000, per: 0, last_update: date.getTime() }, 
             { rate:  50.00, time:    2500000, per: 0, last_update: date.getTime() }, 
             { rate: 100.00, time:    4250000, per: 0, last_update: date.getTime() }
-            */
+            
             
         ]
     };
@@ -90,19 +105,25 @@ const tabulate_clicks = (state) => {
     }, 0);
 };
 
-const tabulate_upgrade_costs = (state) => {
+const get_total_upgrades_cost = (state, key='manual') => {
     let cost = 0;
-    let level = state.upgrades.manual.level;
+    let level = state.upgrades[ key ];
     while(level > 0){
-        cost += get_upgrade_cost( level , 10, 2 );
+        cost += get_upgrade_cost( level , UPGRADES[key].start, UPGRADES[key].base );
         level -= 1;
     }
     return cost;
 }
 
-//console.log( get_upgrade_cost( 2, 10, 2 ) )
-//console.log( tabulate_upgrade_costs( { upgrades: { manual: { level: 2 } } } ) );
-//console.log( tabulate_upgrade_costs( state ) );
+const tabulate_upgrade_costs = (state) => {
+    let cost = get_total_upgrades_cost(state, 'manual');
+    let i_ac = 0;
+    while(i_ac < 10){
+        cost += get_total_upgrades_cost(state, 'ac' + i_ac);
+        i_ac += 1;
+    }
+    return cost;
+}
 
 const clamp_cash = function(cash=0, min=-99999999999.99, max=999999999999.99){
     if(cash < min){ return min; }
@@ -153,12 +174,10 @@ class Boot extends Phaser.Scene {
 
     create () {
         const state2 = this;
-        const font_size = 25;
-        
         // create main display objects
         const gr_main = this.add.graphics();
         gr_main.setName('graph_main');
-        const line_main = this.add.bitmapText( 0, 0, 'min_3px_5px', '', font_size);
+        const line_main = this.add.bitmapText( 0, 0, 'min_3px_5px', '', 25);
         line_main.setName('text_main');
         line_main.setScrollFactor(0, 0);
             
@@ -180,38 +199,47 @@ class Boot extends Phaser.Scene {
         const max = 10;
         let i = 0, x=0, y=0;
         while(i < max){
-            const gr = this.add.graphics();
-            gr.setName('ac_graph_' + i);
-            const line = this.add.bitmapText( 0, 0, 'min_3px_5px', '', font_size);
-            line.setName('ac_text_' + i);
-            line.setScrollFactor(0, 0);
+            const gr_ac = this.add_button('ac' + i, 0, 0, 200, 25);
+            gr_ac.on('pointerdown', () => {
+                state2.auto_clicker_upgrade( parseInt(gr_ac.name.replace(/graph_ac/, '')) )
+            });
             i += 1;
         }    
     }
     
     manual_work () {
-        console.log('manual work action:');
-        const rate = MANUAL_RATES[ state.upgrades.manual.level ];
+        const rate = MANUAL_RATES[ state.upgrades.manual ];
         update_click_rate(state, rate, 1);
-        console.log(state);
-        console.log('');
     }
     
     manual_upgrade () {
         console.log('manual upgrade requested');
-        const level_current = state.upgrades.manual.level;
+        const level_current = state.upgrades.manual;
         const level_next = level_current + 1;
         const upgrade_cost = get_upgrade_cost( level_next, 10, 2 );
-        console.log('current level : ' + level_current );
-        console.log('next level : ' + level_next );
-        console.log('cash : ' + state.cash );
-        console.log('upgrade cost: ' + upgrade_cost);
         if( state.cash >= upgrade_cost ){
-            state.upgrades.manual.level = level_next;
+            state.upgrades.manual = level_next;
             console.log('upgrade successful!');
         }
         if( state.cash < upgrade_cost ){
             console.log('need more money to upgrade');
+        }
+    }
+    
+    auto_clicker_upgrade (index=0) {
+        console.log('auto clicker upgrade requested for ac index: ' + index);
+        const key = 'ac' + index;
+        const level_current = state.upgrades[key];
+        const level_next = level_current + 1;
+        const upgrade_cost = get_upgrade_cost( level_next, UPGRADES[key].start, UPGRADES[key].base );
+        
+        //console.log(level_current, level_next, upgrade_cost);
+        if( state.cash >= upgrade_cost ){
+            state.upgrades[key] = level_next;
+            console.log('upgrade successful!');
+        }
+        if( state.cash < upgrade_cost ){
+            console.log('need ' + upgrade_cost + ' to upgrade');
         }
     }
     
@@ -238,18 +266,20 @@ class Boot extends Phaser.Scene {
         const start_x = 25, start_y = 85;
         let i = 0;
         while(i < max){
-            const ac = state.auto_clickers[i];
-            const graph = state2.children.getByName('ac_graph_' + i);
-            const text = state2.children.getByName('ac_text_' + i);         
+            const ac = state.auto_clickers[i];  
+            const graph = state2.children.getByName('graph_ac' + i);
+            const text = state2.children.getByName('text_ac' + i);  
             const y = start_y + ( bar_height + spacing ) * i;
             graph.x = start_x; graph.y = y;
             text.x = start_x + bar_width + spacing; text.y = y;
             graph.clear();
+            /*
             if(!ac){
                 text.text='';
                 i += 1;
                 continue;
             }
+            */
             const w = bar_width * ac.per;
             graph.fillStyle(0xafafaf);
             graph.fillRect(0, 0, bar_width, bar_height);    
@@ -257,7 +287,7 @@ class Boot extends Phaser.Scene {
             graph.fillStyle(0x00ff00);
             graph.fillRect(0, 0, w, bar_height);
             graph.strokeRect(0, 0, w, bar_height);   
-            text.text = format_cash( ac.rate, 10 ) + ' ' + format_cash( get_per_hour( ac), 10 ) + '/hour';
+            text.text = ac.rate + ' ( ' + get_per_hour( ac ).toFixed(2) + '/hour) ';
             text.setCharacterTint(0, text.text.length, true, 0xffffff);  
             text.setDropShadow(1, 1, 0x2a2a2a, 1);
             i += 1;
@@ -269,7 +299,7 @@ class Boot extends Phaser.Scene {
         const text = this.children.getByName('text_manual');
         graph.fillStyle(0xafafaf);
         graph.fillRect(0, 0, 175, 64);
-        const level = state.upgrades.manual.level;
+        const level = state.upgrades.manual;
         text.text = 'Manual Work\n\nlv ' + level  + ' (' + format_cash(MANUAL_RATES[level], 7) + ')';
         text.setCharacterTint(0, text.text.length, true, 0xffffff);  
         text.setDropShadow(1, 1, 0x2a2a2a, 1);   
@@ -280,7 +310,7 @@ class Boot extends Phaser.Scene {
         const text = this.children.getByName('text_manual_upgrade');
         graph.fillStyle(0xafafaf);
         graph.fillRect(0, 0, 175, 64);
-        const level_current = state.upgrades.manual.level;
+        const level_current = state.upgrades.manual;
         const level_next = level_current + 1;
         const upgrade_cost = get_upgrade_cost( level_next, 10, 2 );
         text.text = 'Upgrade Manual \n\n ' + format_cash( upgrade_cost, 10 ) + '';
@@ -291,17 +321,23 @@ class Boot extends Phaser.Scene {
     update_auto_clickers () {
         const now = new Date();
         let i_ac = 0;
-        const len_ac = state.auto_clickers.length;
+        const len_ac = 10; //state.auto_clickers.length;
         while(i_ac < len_ac){
             const ac = state.auto_clickers[i_ac];
-            const lt = new Date( ac.last_update ).getTime();
-            const ms = now.getTime() - lt;
-            ac.per = ms / ac.time;
-            if(ac.per >= 1){
-                ac.last_update = now.getTime() - ( ac.per % 1 ) * ac.time;
-                const per = Math.floor( ac.per );
-                update_click_rate(state, ac.rate, per);
-                ac.per = 1;
+            const ug = state.upgrades['ac' + i_ac];
+            if(ug <= 0){
+               ac.per = 0;
+            }
+            if(ug > 0){
+                const lt = new Date( ac.last_update ).getTime();
+                const ms = now.getTime() - lt;
+                ac.per = ms / ac.time;
+                if(ac.per >= 1){
+                    ac.last_update = now.getTime() - ( ac.per % 1 ) * ac.time;
+                    const per = Math.floor( ac.per );
+                    update_click_rate(state, ac.rate, per);
+                    ac.per = 1;
+                }
             }
             i_ac += 1;
         }
