@@ -5,13 +5,23 @@ const MANUAL_RATES = [
     20, 25, 30, 35, 40, 45, 50, 55, 60, 64, 70, 75, 80, 85, 90, 95, 100
 ];
 
+const MANUAL_LEVEL_CAP = 30;
+
+const get_upgrade_cost = ( level=1, start=10, base=2 ) => {
+    return start * level + Math.pow( base, level );
+};
+
 const create_state = ( date = new Date() ) => {
     return {
         cash: 0.00,
-        clicks: [], 
-        manual_rate_index: 0,
+        upgrade_costs: 0.00,
+        clicks: [],
+        upgrades: {
+            manual: { level: 0 }
+        },
+        //manual_rate_index: 0,
         auto_clickers: [
-        
+        /*
             { rate:   0.01, time:       7500, per: 0, last_update: date.getTime() },
             { rate:   0.05, time:      20000, per: 0, last_update: date.getTime() },
             { rate:   0.10, time:      30000, per: 0, last_update: date.getTime() },
@@ -23,6 +33,7 @@ const create_state = ( date = new Date() ) => {
             { rate:  20.00, time:    1750000, per: 0, last_update: date.getTime() }, 
             { rate:  50.00, time:    2500000, per: 0, last_update: date.getTime() }, 
             { rate: 100.00, time:    4250000, per: 0, last_update: date.getTime() }
+            */
             
         ]
     };
@@ -79,6 +90,20 @@ const tabulate_clicks = (state) => {
     }, 0);
 };
 
+const tabulate_upgrade_costs = (state) => {
+    let cost = 0;
+    let level = state.upgrades.manual.level;
+    while(level > 0){
+        cost += get_upgrade_cost( level , 10, 2 );
+        level -= 1;
+    }
+    return cost;
+}
+
+//console.log( get_upgrade_cost( 2, 10, 2 ) )
+//console.log( tabulate_upgrade_costs( { upgrades: { manual: { level: 2 } } } ) );
+//console.log( tabulate_upgrade_costs( state ) );
+
 const clamp_cash = function(cash=0, min=-99999999999.99, max=999999999999.99){
     if(cash < min){ return min; }
     if(cash > max){ return max; }
@@ -125,20 +150,39 @@ class Boot extends Phaser.Scene {
         line_main.setName('text_main');
         line_main.setScrollFactor(0, 0);
         
-        // create manual_clicker display objects
-        const gr_ma = this.add.graphics();
-        const x2 = 640 - 128 - 25;
-        const y2 = 100;
-        gr_ma.x = x2; gr_ma.y = y2;
-        gr_ma.setName('graph_manual');
-        set_graphics_interactive(gr_ma, 0, 0, 128, 64);
-        gr_ma.on('pointerdown', ()=>{
-            state2.manual_work();
-        })
-        const line = this.add.bitmapText( 0, 0, 'min_3px_5px', 'Prefrom work', font_size );
-        line.x = x2;
-        line.y = y2;
-        line.setName('text_manual');
+        // create manual display objects
+        {
+            const gr_ma = this.add.graphics();
+            const x = 640 - 175 - 25;
+            const y = 100;
+            gr_ma.x = x; gr_ma.y = y;
+            gr_ma.setName('graph_manual');
+            set_graphics_interactive(gr_ma, 0, 0, 175, 64);
+            gr_ma.on('pointerdown', ()=>{
+                state2.manual_work();
+            })
+            const line = this.add.bitmapText( 0, 0, 'min_3px_5px', '', font_size );
+            line.x = x;
+            line.y = y;
+            line.setName('text_manual');
+        }
+        // create manual_upgrade display objects
+        {
+            const gr_ma = this.add.graphics();
+            const x = 640 - 175 - 25;
+            const y = 200;
+            gr_ma.x = x; gr_ma.y = y;
+            gr_ma.setName('graph_manual_upgrade');
+            set_graphics_interactive(gr_ma, 0, 0, 175, 64);
+            gr_ma.on('pointerdown', ()=>{
+                //console.log('yes now');
+                state2.manual_upgrade();
+            })
+            const line = this.add.bitmapText( 0, 0, 'min_3px_5px', '', font_size );
+            line.x = x;
+            line.y = y;
+            line.setName('text_manual_upgrade');
+        }
         
         // create auto_clicker display objects
         const bar_width = 150;
@@ -157,10 +201,28 @@ class Boot extends Phaser.Scene {
     
     manual_work () {
         console.log('manual work action:');
-        const rate = MANUAL_RATES[ state.manual_rate_index ];
+        const rate = MANUAL_RATES[ state.upgrades.manual.level ];
         update_click_rate(state, rate, 1);
         console.log(state);
         console.log('');
+    }
+    
+    manual_upgrade () {
+        console.log('manual upgrade requested');
+        const level_current = state.upgrades.manual.level;
+        const level_next = level_current + 1;
+        const upgrade_cost = get_upgrade_cost( level_next, 10, 2 );
+        console.log('current level : ' + level_current );
+        console.log('next level : ' + level_next );
+        console.log('cash : ' + state.cash );
+        console.log('upgrade cost: ' + upgrade_cost);
+        if( state.cash >= upgrade_cost ){
+            state.upgrades.manual.level = level_next;
+            console.log('upgrade successful!');
+        }
+        if( state.cash < upgrade_cost ){
+            console.log('need more money to upgrade');
+        }
     }
     
     render_main () {
@@ -216,8 +278,22 @@ class Boot extends Phaser.Scene {
         const graph = this.children.getByName('graph_manual');
         const text = this.children.getByName('text_manual');
         graph.fillStyle(0xafafaf);
-        graph.fillRect(0, 0, 128, 64);
-        text.text = 'Manual Work';
+        graph.fillRect(0, 0, 175, 64);
+        const level = state.upgrades.manual.level;
+        text.text = 'Manual Work\n\nlv ' + level  + ' (' + format_cash(MANUAL_RATES[level], 7) + ')';
+        text.setCharacterTint(0, text.text.length, true, 0xffffff);  
+        text.setDropShadow(1, 1, 0x2a2a2a, 1);   
+    }
+    
+    render_manual_upgrade_button () {
+        const graph = this.children.getByName('graph_manual_upgrade');
+        const text = this.children.getByName('text_manual_upgrade');
+        graph.fillStyle(0xafafaf);
+        graph.fillRect(0, 0, 175, 64);
+        const level_current = state.upgrades.manual.level;
+        const level_next = level_current + 1;
+        const upgrade_cost = get_upgrade_cost( level_next, 10, 2 );
+        text.text = 'Upgrade Manual \n\n ' + format_cash( upgrade_cost, 10 ) + '';
         text.setCharacterTint(0, text.text.length, true, 0xffffff);  
         text.setDropShadow(1, 1, 0x2a2a2a, 1);   
     }
@@ -247,10 +323,14 @@ class Boot extends Phaser.Scene {
         if(now - this.lt >= 100){
             this.update_auto_clickers();       
             state.cash = tabulate_clicks(state);
+            state.upgrade_costs = tabulate_upgrade_costs(state);
+            state.cash = state.cash - state.upgrade_costs;
             state.cash = clamp_cash(state.cash);
+            
             localStorage.setItem('income_game_save', JSON.stringify( state ) );
             this.render_main();
             this.render_manual_button();
+            this.render_manual_upgrade_button();
             this.render_auto_clickers();
             this.lt = now;
         }
