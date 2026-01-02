@@ -8,8 +8,8 @@
 * (done) use the dim return function to help set the auto clicker time
 * (done) per hour rates should reflect the current state of the auto clicker
 * (done) auto clicker in save state can start as an empty array
+* (done) display upgrade cost for auto clickers
 
-* () display upgrade cost for auto clickers
 * () reset start time of auto clicker when upgraded for the first time
 * () upgrades object in save state can start out as an empty object
 * () have a load save method, and rename state object to save\_state

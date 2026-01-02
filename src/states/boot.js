@@ -19,7 +19,7 @@ const UPGRADES = {
     ac9:     { start:   100000, base: 4.00, rate: 100.00, time_start: 425000 }
 };
 
-// using my old diminishing returns method! 
+// using my old diminishing returns method. 
 // https://dustinpfister.github.io/2021/07/28/js-function-diminishing-returns/
 const dim_return = function (number=0, mid_point=30) {
     return 1 - 1 / (number / mid_point + 1);
@@ -30,7 +30,6 @@ const get_upgrade_cost = ( level=1, start=10, base=2 ) => {
 };
 
 const create_state = ( date = new Date() ) => {
-
     return {
         cash: 0.00,
         upgrade_costs: 0.00,
@@ -156,14 +155,14 @@ class Boot extends Phaser.Scene {
         this.key = 'Boot';
     }
     
-    add_button ( suffix='', x=0, y=0, w=200, h=64, font_size=25 ) {
+    add_button ( suffix='', x=0, y=0, w=200, h=64, font_size=25, dx=0, dy=0 ) {
         const gr = this.add.graphics();
         gr.x = x; gr.y = y;
         gr.setName('graph_' + suffix);
         set_graphics_interactive(gr, 0, 0, w, h);
-        const line = this.add.bitmapText( x, y, 'min_3px_5px', '', font_size);
-        line.setName('text_' + suffix);
-        line.setScrollFactor(0, 0);
+        const text = this.add.bitmapText( x + dx, y + dy, 'min_3px_5px', '', font_size);
+        text.setName('text_' + suffix);
+        text.setScrollFactor(0, 0);
         return gr;
     }
     
@@ -208,10 +207,13 @@ class Boot extends Phaser.Scene {
         const max = 10;
         let i = 0, x=0, y=0;
         while(i < max){
-            const gr_ac = this.add_button('ac' + i, 0, 0, 200, 25);
-            gr_ac.on('pointerdown', () => {
-                state2.auto_clicker_upgrade( parseInt(gr_ac.name.replace(/graph_ac/, '')) )
-            });
+            const gr_ac = this.add_button('ac' + i, 25, 100 + (25 + 10) * i, 400, 25, 22, 5, 5);
+            (function(i_ac){
+                gr_ac.on('pointerdown', () => {
+                    //const i_ac = parseInt( gr_ac.name.replace(/graph_ac/, '') );
+                    state2.auto_clicker_upgrade( i_ac );
+                });
+            }(i))
             i += 1;
         }    
     }
@@ -268,20 +270,21 @@ class Boot extends Phaser.Scene {
     
     render_auto_clickers () {
         const state2 = this;
-        const bar_width = 100;
+        const bar_width = 400;
         const bar_height = 25;
         const spacing = 10;
         const max = 10;
         const start_x = 25, start_y = 85;
         let i = 0;
         while(i < max){
-            const ac = state.auto_clickers[i];  
-            const ug = UPGRADES['ac' + i]
+            const ac = state.auto_clickers[i];
+            const key = 'ac' + i;
+            const uc = state.upgrades[key];
+            const ug = UPGRADES[key];
             const graph = state2.children.getByName('graph_ac' + i);
             const text = state2.children.getByName('text_ac' + i);  
             const y = start_y + ( bar_height + spacing ) * i;
-            graph.x = start_x; graph.y = y;
-            text.x = start_x + bar_width + spacing; text.y = y;
+            const upgrade_cost = get_upgrade_cost( uc + 1, UPGRADES[key].start, UPGRADES[key].base );
             graph.clear();
             const w = bar_width * ac.per;
             graph.fillStyle(0xafafaf);
@@ -290,7 +293,8 @@ class Boot extends Phaser.Scene {
             graph.fillStyle(0x00ff00);
             graph.fillRect(0, 0, w, bar_height);
             graph.strokeRect(0, 0, w, bar_height);   
-            text.text = ug.rate + ' ( ' + get_per_hour( state, i ).toFixed(2) + '/hour) ' + Math.floor(ac.time);
+            text.text = format_cash(upgrade_cost, 15) + ' - ' +
+                ug.rate + ' ( ' + get_per_hour( state, i ).toFixed(2) + '/hour) ' + Math.floor(ac.time);
             text.setCharacterTint(0, text.text.length, true, 0xffffff);  
             text.setDropShadow(1, 1, 0x2a2a2a, 1);
             i += 1;
