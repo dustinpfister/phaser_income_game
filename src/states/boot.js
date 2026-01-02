@@ -5,27 +5,25 @@ const MANUAL_RATES = [
     20, 25, 30, 35, 40, 45, 50, 55, 60, 64, 70, 75, 80, 85, 90, 95, 100
 ];
 
-/*
-const AUTO_CLICK = [
-    [0.01]
-];
-*/
-
 const UPGRADES = {
     manual : { start:        1, base: 2.00 },
-    ac0:     { start:        1, base: 1.25 },
-    ac1:     { start:      100, base: 1.50 },
-    ac2:     { start:      250, base: 1.75 },
-    ac3:     { start:      750, base: 2.00 },
-    ac4:     { start:     1250, base: 2.50 },
-    ac5:     { start:     5000, base: 2.75 },
-    ac6:     { start:    12000, base: 3.00 },
-    ac7:     { start:    50000, base: 3.05 },
-    ac8:     { start:   100000, base: 3.75 },
-    ac9:     { start:  1000000, base: 4.00 }
+    ac0:     { start:        1, base: 1.25, rate:   0.01, time_start: 10000 },
+    ac1:     { start:      100, base: 1.50, rate:   0.05, time_start: 10000 },
+    ac2:     { start:      250, base: 1.75, rate:   0.10, time_start: 10000 },
+    ac3:     { start:      750, base: 2.00, rate:   0.25, time_start: 10000 },
+    ac4:     { start:     1250, base: 2.50, rate:   0.50, time_start: 10000 },
+    ac5:     { start:     5000, base: 2.75, rate:   1.00, time_start: 10000 },
+    ac6:     { start:    12000, base: 3.00, rate:   5.00, time_start: 10000 },
+    ac7:     { start:    50000, base: 3.05, rate:  10.00, time_start: 10000 },
+    ac8:     { start:   100000, base: 3.75, rate:  50.00, time_start: 10000 },
+    ac9:     { start:  1000000, base: 4.00, rate: 100.00, time_start: 10000 }
 };
 
-const MANUAL_LEVEL_CAP = 30;
+// using my old diminishing returns method! 
+// https://dustinpfister.github.io/2021/07/28/js-function-diminishing-returns/
+const dim_return = function (number=0, mid_point=30) {
+    return 1 - 1 / (number / mid_point + 1);
+};
 
 const get_upgrade_cost = ( level=1, start=10, base=2 ) => {
     return start * level + Math.pow( base, level );
@@ -41,21 +39,10 @@ const create_state = ( date = new Date() ) => {
         ],
         upgrades: {
             manual: 0,
-            ac0 : 0, ac1 : 0, ac2 : 0, ac3 : 0, ac4 : 0, ac5 : 0, ac6 : 0, ac7 : 0, ac8 : 0, ac9 : 0
+            ac0 : 1, ac1 : 0, ac2 : 0, ac3 : 0, ac4 : 0, ac5 : 0, ac6 : 0, ac7 : 0, ac8 : 0, ac9 : 0
         },
         auto_clickers: [
-        
             { rate:   0.01, time:       7500, per: 0, last_update: date.getTime() },
-            { rate:   0.05, time:      20000, per: 0, last_update: date.getTime() },
-            { rate:   0.10, time:      30000, per: 0, last_update: date.getTime() },
-            { rate:   0.25, time:      55000, per: 0, last_update: date.getTime() },
-            { rate:   1.00, time:     180000, per: 0, last_update: date.getTime() },      
-            { rate:   5.00, time:     750000, per: 0, last_update: date.getTime() },
-            { rate:  10.00, time:    1250000, per: 0, last_update: date.getTime() },
-            { rate:  20.00, time:    1750000, per: 0, last_update: date.getTime() }, 
-            { rate:  50.00, time:    2500000, per: 0, last_update: date.getTime() }, 
-            { rate: 100.00, time:    4250000, per: 0, last_update: date.getTime() }
-                       
         ]
     };
 };
@@ -75,6 +62,7 @@ window.reset = ( date = new Date() ) => {
     const state_new = create_state( date );
     localStorage.setItem('income_game_save', JSON.stringify( state_new ) );
     state = Object.assign({}, state_new );
+    document.location.reload();
 };
 
 const get_per_hour = ( state, index ) => {
@@ -183,8 +171,31 @@ class Boot extends Phaser.Scene {
         this.load.bitmapFont('min_3px_5px', 'fonts/min_3px_5px.png', 'fonts/min_3px_5px.xml');
     }
 
+    load_save () {
+    
+        // check auto clicker objects
+        const max = 10;
+        let i = 0;
+        while(i < max){
+            const ug = UPGRADES['ac' + i];
+            let ac = state.auto_clickers[i];
+            if(!ac){
+                ac = {};
+            }
+            ac.rate = ug.rate;
+            ac.time = ug.time_start;
+            ac.last_update = ac.last_update === undefined ? new Date().getTime() : ac.last_update;
+            state.auto_clickers[i] = ac;
+            i += 1;
+        }    
+    
+    }
+
     create () {
         const state2 = this;
+        
+        this.load_save();
+        
         // create main display objects
         const gr_main = this.add.graphics();
         gr_main.setName('graph_main');
@@ -336,6 +347,9 @@ class Boot extends Phaser.Scene {
         while(i_ac < len_ac){
             const ac = state.auto_clickers[i_ac];
             const ug = state.upgrades['ac' + i_ac];
+            
+            ac.time = UPGRADES['ac' + i_ac].time_start;
+            
             if(ug <= 0){
                ac.per = 0;
             }
