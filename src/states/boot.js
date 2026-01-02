@@ -7,16 +7,16 @@ const MANUAL_RATES = [
 
 const UPGRADES = {
     manual : { start:        1, base: 2.00 },
-    ac0:     { start:        1, base: 1.25, rate:   0.01, time_start: 10000 },
-    ac1:     { start:      100, base: 1.50, rate:   0.05, time_start: 10000 },
-    ac2:     { start:      250, base: 1.75, rate:   0.10, time_start: 10000 },
-    ac3:     { start:      750, base: 2.00, rate:   0.25, time_start: 10000 },
-    ac4:     { start:     1250, base: 2.50, rate:   0.50, time_start: 10000 },
-    ac5:     { start:     5000, base: 2.75, rate:   1.00, time_start: 10000 },
-    ac6:     { start:    12000, base: 3.00, rate:   5.00, time_start: 10000 },
-    ac7:     { start:    50000, base: 3.05, rate:  10.00, time_start: 10000 },
-    ac8:     { start:   100000, base: 3.75, rate:  50.00, time_start: 10000 },
-    ac9:     { start:  1000000, base: 4.00, rate: 100.00, time_start: 10000 }
+    ac0:     { start:        1, base: 1.25, rate:   0.01, time_start:   3000 },
+    ac1:     { start:      100, base: 1.50, rate:   0.05, time_start:   5000 },
+    ac2:     { start:      250, base: 1.75, rate:   0.10, time_start:   9000 },
+    ac3:     { start:      750, base: 2.00, rate:   0.25, time_start:  15000 },
+    ac4:     { start:     1250, base: 2.50, rate:   0.50, time_start:  22000 },
+    ac5:     { start:     5000, base: 2.75, rate:   1.00, time_start:  40000 },
+    ac6:     { start:    12000, base: 3.00, rate:   5.00, time_start:  75000 },
+    ac7:     { start:    25000, base: 3.05, rate:  10.00, time_start: 100000 },
+    ac8:     { start:    50000, base: 3.75, rate:  50.00, time_start: 250000 },
+    ac9:     { start:   100000, base: 4.00, rate: 100.00, time_start: 425000 }
 };
 
 // using my old diminishing returns method! 
@@ -35,15 +35,15 @@ const create_state = ( date = new Date() ) => {
         cash: 0.00,
         upgrade_costs: 0.00,
         clicks: [
-            [1, 2.25]
+            //[1, 2.25]
             //[1, 12191025.55]
         ],
         upgrades: {
             manual: 0,
-            ac0 : 1, ac1 : 0, ac2 : 0, ac3 : 0, ac4 : 0, ac5 : 0, ac6 : 0, ac7 : 0, ac8 : 0, ac9 : 0
+            ac0 : 0, ac1 : 0, ac2 : 0, ac3 : 0, ac4 : 0, ac5 : 0, ac6 : 0, ac7 : 0, ac8 : 0, ac9 : 0
         },
         auto_clickers: [
-            { time:       7500, per: 0, last_update: date.getTime() },
+            //{ time:       7500, per: 0, last_update: date.getTime() },
         ]
     };
 };

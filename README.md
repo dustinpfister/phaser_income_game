@@ -10,14 +10,9 @@ The object of the game is to just make money and that is all. The two general wa
 
 Manual Income can be made by clicking the 'Manual Work' button. There is then the current cost of the next upgrade for the manual work button that can be used to upgrade the manual work button to the next level to make a little more money for each click.
 
+### Auto Income
 
-## What needs to get done for at least R0
-
-* (done) User clicks a manual income button
-* (done) The Manual income button can be upgraded
-* (done) The user can buy and upgrade auto clickers
-* () auto clicker upgrades should have an effect on time
-* () per hour rates should reflect the current state of the auto clicker
+Auto income can be obtained by clicking on the various auto clickers.
 
 
 
