@@ -42,7 +42,7 @@ const create_state = ( date = new Date() ) => {
             ac0 : 1, ac1 : 0, ac2 : 0, ac3 : 0, ac4 : 0, ac5 : 0, ac6 : 0, ac7 : 0, ac8 : 0, ac9 : 0
         },
         auto_clickers: [
-            { rate:   0.01, time:       7500, per: 0, last_update: date.getTime() },
+            { time:       7500, per: 0, last_update: date.getTime() },
         ]
     };
 };
@@ -59,19 +59,23 @@ if(save){
 }
 
 window.reset = ( date = new Date() ) => {
-    const state_new = create_state( date );
-    localStorage.setItem('income_game_save', JSON.stringify( state_new ) );
-    state = Object.assign({}, state_new );
+    //const state_new = create_state( date );
+    localStorage.clear();
     document.location.reload();
+    //localStorage.setItem('income_game_save', JSON.stringify( state_new ) );
+    //state = Object.assign({}, state_new );
+    //document.location.reload();
 };
 
 const get_per_hour = ( state, index ) => {
     const ac = state.auto_clickers[index];
-    const ug = state.upgrades['ac' + index];
-    if(ug === 0){
+    const ug = UPGRADES['ac' + index];
+    const uc = state.upgrades['ac' + index];
+    if(uc === 0){
         return 0;
     }
-    return ac.rate / ac.time * ( 1000 * 60 * 60 );
+    const per_hour = ug.rate / ac.time * ( 1000 * 60 * 60 );
+    return per_hour;
 };
 
 const get_click_rec = (state, rate = 0.05 ) => {
@@ -170,31 +174,17 @@ class Boot extends Phaser.Scene {
         // FONTS
         this.load.bitmapFont('min_3px_5px', 'fonts/min_3px_5px.png', 'fonts/min_3px_5px.xml');
     }
-
+/*
     load_save () {
     
-        // check auto clicker objects
-        const max = 10;
-        let i = 0;
-        while(i < max){
-            const ug = UPGRADES['ac' + i];
-            let ac = state.auto_clickers[i];
-            if(!ac){
-                ac = {};
-            }
-            ac.rate = ug.rate;
-            ac.time = ug.time_start;
-            ac.last_update = ac.last_update === undefined ? new Date().getTime() : ac.last_update;
-            state.auto_clickers[i] = ac;
-            i += 1;
-        }    
-    
+      
     }
+    */
 
     create () {
         const state2 = this;
         
-        this.load_save();
+        //this.load_save();
         
         // create main display objects
         const gr_main = this.add.graphics();
@@ -289,6 +279,7 @@ class Boot extends Phaser.Scene {
         let i = 0;
         while(i < max){
             const ac = state.auto_clickers[i];  
+            const ug = UPGRADES['ac' + i]
             const graph = state2.children.getByName('graph_ac' + i);
             const text = state2.children.getByName('text_ac' + i);  
             const y = start_y + ( bar_height + spacing ) * i;
@@ -309,7 +300,7 @@ class Boot extends Phaser.Scene {
             graph.fillStyle(0x00ff00);
             graph.fillRect(0, 0, w, bar_height);
             graph.strokeRect(0, 0, w, bar_height);   
-            text.text = ac.rate + ' ( ' + get_per_hour( state, i ).toFixed(2) + '/hour) ';
+            text.text = ug.rate + ' ( ' + get_per_hour( state, i ).toFixed(2) + '/hour) ';
             text.setCharacterTint(0, text.text.length, true, 0xffffff);  
             text.setDropShadow(1, 1, 0x2a2a2a, 1);
             i += 1;
@@ -345,9 +336,16 @@ class Boot extends Phaser.Scene {
         let i_ac = 0;
         const len_ac = 10; //state.auto_clickers.length;
         while(i_ac < len_ac){
-            const ac = state.auto_clickers[i_ac];
+            let ac = state.auto_clickers[i_ac];
             const ug = state.upgrades['ac' + i_ac];
-            
+          
+            if(!ac){
+                ac = state.auto_clickers[i_ac] = {};
+                ac.rate = ug.rate;
+                ac.time = ug.time_start;
+                ac.last_update = new Date().getTime();
+            }
+          
             ac.time = UPGRADES['ac' + i_ac].time_start;
             
             if(ug <= 0){
@@ -360,7 +358,7 @@ class Boot extends Phaser.Scene {
                 if(ac.per >= 1){
                     ac.last_update = now.getTime() - ( ac.per % 1 ) * ac.time;
                     const per = Math.floor( ac.per );
-                    update_click_rate(state, ac.rate, per);
+                    update_click_rate(state, ug.rate, per);
                     ac.per = 1;
                 }
             }
