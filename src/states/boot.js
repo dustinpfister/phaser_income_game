@@ -5,18 +5,24 @@ const MANUAL_RATES = [
     20, 25, 30, 35, 40, 45, 50, 55, 60, 64, 70, 75, 80, 85, 90, 95, 100
 ];
 
+/*
+const AUTO_CLICK = [
+    [0.01]
+];
+*/
+
 const UPGRADES = {
-    manual : { start:      10, base: 2 },
-    ac0:     {start:     1000, base: 1.25 },
-    ac1:     {start:     5000, base: 1.50 },
-    ac2:     {start:    10000, base: 1.75 },
-    ac3:     {start:    25000, base: 2.00 },
-    ac4:     {start:    50000, base: 2.50 },
-    ac5:     {start:   100000, base: 2.75 },
-    ac6:     {start:   250000, base: 3.00 },
-    ac7:     {start:   750000, base: 3.05 },
-    ac8:     {start:  1000000, base: 3.75 },
-    ac9:     {start: 10000000, base: 4.00 }
+    manual : { start:        1, base: 2.00 },
+    ac0:     { start:        1, base: 1.25 },
+    ac1:     { start:      100, base: 1.50 },
+    ac2:     { start:      250, base: 1.75 },
+    ac3:     { start:      750, base: 2.00 },
+    ac4:     { start:     1250, base: 2.50 },
+    ac5:     { start:     5000, base: 2.75 },
+    ac6:     { start:    12000, base: 3.00 },
+    ac7:     { start:    50000, base: 3.05 },
+    ac8:     { start:   100000, base: 3.75 },
+    ac9:     { start:  1000000, base: 4.00 }
 };
 
 const MANUAL_LEVEL_CAP = 30;
@@ -26,15 +32,16 @@ const get_upgrade_cost = ( level=1, start=10, base=2 ) => {
 };
 
 const create_state = ( date = new Date() ) => {
+
     return {
         cash: 0.00,
         upgrade_costs: 0.00,
         clicks: [
-            [1, 12191025.55]
+            //[1, 12191025.55]
         ],
         upgrades: {
             manual: 0,
-            ac0 : 1, ac1 : 1, ac2 : 1, ac3 : 1, ac4 : 1, ac5 : 1, ac6 : 1, ac7 : 1, ac8 : 1, ac9 : 1,
+            ac0 : 0, ac1 : 0, ac2 : 0, ac3 : 0, ac4 : 0, ac5 : 0, ac6 : 0, ac7 : 0, ac8 : 0, ac9 : 0
         },
         auto_clickers: [
         
@@ -48,8 +55,7 @@ const create_state = ( date = new Date() ) => {
             { rate:  20.00, time:    1750000, per: 0, last_update: date.getTime() }, 
             { rate:  50.00, time:    2500000, per: 0, last_update: date.getTime() }, 
             { rate: 100.00, time:    4250000, per: 0, last_update: date.getTime() }
-            
-            
+                       
         ]
     };
 };
@@ -71,7 +77,12 @@ window.reset = ( date = new Date() ) => {
     state = Object.assign({}, state_new );
 };
 
-const get_per_hour = ( ac ) => {
+const get_per_hour = ( state, index ) => {
+    const ac = state.auto_clickers[index];
+    const ug = state.upgrades['ac' + index];
+    if(ug === 0){
+        return 0;
+    }
     return ac.rate / ac.time * ( 1000 * 60 * 60 );
 };
 
@@ -216,7 +227,7 @@ class Boot extends Phaser.Scene {
         console.log('manual upgrade requested');
         const level_current = state.upgrades.manual;
         const level_next = level_current + 1;
-        const upgrade_cost = get_upgrade_cost( level_next, 10, 2 );
+        const upgrade_cost = get_upgrade_cost( level_next, UPGRADES.manual.start, UPGRADES.manual.base );
         if( state.cash >= upgrade_cost ){
             state.upgrades.manual = level_next;
             console.log('upgrade successful!');
@@ -287,7 +298,7 @@ class Boot extends Phaser.Scene {
             graph.fillStyle(0x00ff00);
             graph.fillRect(0, 0, w, bar_height);
             graph.strokeRect(0, 0, w, bar_height);   
-            text.text = ac.rate + ' ( ' + get_per_hour( ac ).toFixed(2) + '/hour) ';
+            text.text = ac.rate + ' ( ' + get_per_hour( state, i ).toFixed(2) + '/hour) ';
             text.setCharacterTint(0, text.text.length, true, 0xffffff);  
             text.setDropShadow(1, 1, 0x2a2a2a, 1);
             i += 1;
@@ -312,7 +323,7 @@ class Boot extends Phaser.Scene {
         graph.fillRect(0, 0, 175, 64);
         const level_current = state.upgrades.manual;
         const level_next = level_current + 1;
-        const upgrade_cost = get_upgrade_cost( level_next, 10, 2 );
+        const upgrade_cost = get_upgrade_cost( level_next, UPGRADES.manual.start, UPGRADES.manual.base );
         text.text = 'Upgrade Manual \n\n ' + format_cash( upgrade_cost, 10 ) + '';
         text.setCharacterTint(0, text.text.length, true, 0xffffff);  
         text.setDropShadow(1, 1, 0x2a2a2a, 1);   
