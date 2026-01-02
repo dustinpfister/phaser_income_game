@@ -35,6 +35,7 @@ const create_state = ( date = new Date() ) => {
         cash: 0.00,
         upgrade_costs: 0.00,
         clicks: [
+            [1, 2.25]
             //[1, 12191025.55]
         ],
         upgrades: {
@@ -58,13 +59,9 @@ if(save){
     state = Object.assign(state, obj_save);
 }
 
-window.reset = ( date = new Date() ) => {
-    //const state_new = create_state( date );
+window.reset = ( ) => {
     localStorage.clear();
     document.location.reload();
-    //localStorage.setItem('income_game_save', JSON.stringify( state_new ) );
-    //state = Object.assign({}, state_new );
-    //document.location.reload();
 };
 
 const get_per_hour = ( state, index ) => {
@@ -286,13 +283,6 @@ class Boot extends Phaser.Scene {
             graph.x = start_x; graph.y = y;
             text.x = start_x + bar_width + spacing; text.y = y;
             graph.clear();
-            /*
-            if(!ac){
-                text.text='';
-                i += 1;
-                continue;
-            }
-            */
             const w = bar_width * ac.per;
             graph.fillStyle(0xafafaf);
             graph.fillRect(0, 0, bar_width, bar_height);    
@@ -300,7 +290,7 @@ class Boot extends Phaser.Scene {
             graph.fillStyle(0x00ff00);
             graph.fillRect(0, 0, w, bar_height);
             graph.strokeRect(0, 0, w, bar_height);   
-            text.text = ug.rate + ' ( ' + get_per_hour( state, i ).toFixed(2) + '/hour) ';
+            text.text = ug.rate + ' ( ' + get_per_hour( state, i ).toFixed(2) + '/hour) ' + Math.floor(ac.time);
             text.setCharacterTint(0, text.text.length, true, 0xffffff);  
             text.setDropShadow(1, 1, 0x2a2a2a, 1);
             i += 1;
@@ -337,21 +327,22 @@ class Boot extends Phaser.Scene {
         const len_ac = 10; //state.auto_clickers.length;
         while(i_ac < len_ac){
             let ac = state.auto_clickers[i_ac];
-            const ug = state.upgrades['ac' + i_ac];
+            const ug = UPGRADES[ 'ac' + i_ac  ]
+            const uc = state.upgrades['ac' + i_ac];
           
             if(!ac){
                 ac = state.auto_clickers[i_ac] = {};
-                ac.rate = ug.rate;
                 ac.time = ug.time_start;
                 ac.last_update = new Date().getTime();
             }
           
-            ac.time = UPGRADES['ac' + i_ac].time_start;
+            //ac.time = UPGRADES['ac' + i_ac].time_start;
+            ac.time = ( 1 - dim_return(uc, 30) ) * ug.time_start; 
             
-            if(ug <= 0){
+            if(uc <= 0){
                ac.per = 0;
             }
-            if(ug > 0){
+            if(uc > 0){
                 const lt = new Date( ac.last_update ).getTime();
                 const ms = now.getTime() - lt;
                 ac.per = ms / ac.time;
