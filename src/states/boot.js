@@ -34,6 +34,7 @@ const create_state = ( date = new Date() ) => {
         cash: 0.00,
         upgrade_costs: 0.00,
         clicks: [
+            [1, 250000]
             //[1, 2.25]
             //[1, 12191025.55]
         ],
@@ -243,10 +244,11 @@ class Boot extends Phaser.Scene {
         const level_current = state.upgrades[key];
         const level_next = level_current + 1;
         const upgrade_cost = get_upgrade_cost( level_next, UPGRADES[key].start, UPGRADES[key].base );
-        
-        //console.log(level_current, level_next, upgrade_cost);
         if( state.cash >= upgrade_cost ){
             state.upgrades[key] = level_next;
+            if(level_current === 0){
+                state.auto_clickers[index].last_update = new Date().getTime();
+            }
             console.log('upgrade successful!');
         }
         if( state.cash < upgrade_cost ){
