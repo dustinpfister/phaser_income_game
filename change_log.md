@@ -14,7 +14,7 @@
 * () upgrades object in save state can start out as an empty object
 * () finish work on 5 x 7 font
 
-## () R0 - Core Idea Working
+## ( done 01/04/2026 ) R0 - Core Idea Working
 * (done) User clicks a manual income button
 * (done) The Manual income button can be upgraded
 * (done) The user can buy and upgrade auto clickers
@@ -29,7 +29,7 @@
 * (done) have boot state define an egg global that can be used to reset the game
 * (done) level cap for manual upgrades
 * (done) have a 5 x 7 font
-* () fav icon
+* (done) fav icon
 
 
 

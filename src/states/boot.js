@@ -23,7 +23,6 @@ class Boot extends Phaser.Scene {
     }
     
     preload(){
-        this.load.bitmapFont('min_3px_5px', 'fonts/min_3px_5px.png', 'fonts/min_3px_5px.xml');
         this.load.bitmapFont('min_5px_7px', 'fonts/min_5px_7px.png', 'fonts/min_5px_7px.xml');
     }
 
