@@ -5,6 +5,7 @@
 <page id="0" file="font.png"/>
 </pages>
 <chars count="91">
+<!-- 98 chars total with 1px space ( 4 * 98 = 392px image width)-->
 
 <!-- Space,!,", ... -->
 <char id="32" x=  "0" y= "0" width="1" height="1" xoffset="0" yoffset="0" xadvance="4" page="0" chnl="0"/>
@@ -18,7 +19,6 @@
 <char id="40" x="316" y= "0" width="3" height="5" xoffset="0" yoffset="0" xadvance="4" page="0" chnl="0"/>
 <char id="41" x="320" y= "0" width="3" height="5" xoffset="0" yoffset="0" xadvance="4" page="0" chnl="0"/>
 <char id="42" x="296" y= "0" width="3" height="5" xoffset="0" yoffset="0" xadvance="4" page="0" chnl="0"/>
-
 <char id="43" x="324" y= "0" width="3" height="5" xoffset="0" yoffset="0" xadvance="4" page="0" chnl="0"/>
 <char id="44" x="252" y= "0" width="3" height="5" xoffset="0" yoffset="0" xadvance="4" page="0" chnl="0"/>
 <char id="45" x="328" y= "0" width="3" height="5" xoffset="0" yoffset="0" xadvance="4" page="0" chnl="0"/>

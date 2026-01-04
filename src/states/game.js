@@ -129,7 +129,7 @@ class Game extends Phaser.Scene {
         gr.x = x; gr.y = y;
         gr.setName('graph_' + suffix);
         set_graphics_interactive(gr, 0, 0, w, h);
-        const text = this.add.bitmapText( x + dx, y + dy, 'min_3px_5px', '', font_size);
+        const text = this.add.bitmapText( x + dx, y + dy, 'min_5px_7px', '', font_size);
         text.setName('text_' + suffix);
         text.setScrollFactor(0, 0);
         return gr;
@@ -141,7 +141,7 @@ class Game extends Phaser.Scene {
         // create main display objects
         const gr_main = this.add.graphics();
         gr_main.setName('graph_main');
-        const line_main = this.add.bitmapText( 0, 0, 'min_3px_5px', '', 25);
+        const line_main = this.add.bitmapText( 0, 0, 'min_5px_7px', '', 25);
         line_main.setName('text_main');
         line_main.setScrollFactor(0, 0);
             

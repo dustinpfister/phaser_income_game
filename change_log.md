@@ -12,6 +12,7 @@
 * () start a lib/save to hold save state manager code
 * () start a lib/upgrades to hold upgrade code
 * () upgrades object in save state can start out as an empty object
+* () finish work on 5 x 7 font
 
 ## () R0 - Core Idea Working
 * (done) User clicks a manual income button
@@ -27,7 +28,8 @@
 * (done) load save in boot state and set it to the registry
 * (done) have boot state define an egg global that can be used to reset the game
 * (done) level cap for manual upgrades
-* () have a 5 x 7 font
+* (done) have a 5 x 7 font
+* () fav icon
 
 
 
