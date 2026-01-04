@@ -1,11 +1,19 @@
 # phaser_income_game change log
 
-## () R1 - Level Caps? upgrades make sense?
+## () R3 - improved button objects
+* () add button returns a group object with graphics and bitmap text as children
 
+## () R2 - save only stores values that need to be saved
+* () new state object that stores values that can be found from save data such as cash
+* () cash and upgrade costs do not need to be stored in the save state
+* () time does not need to be stored in an auto clicker object
 
+## () R1 - upgrade, save, and click libs
+* () start a lib/save to hold save state manager code
+* () start a lib/upgrades to hold upgrade code
+* () upgrades object in save state can start out as an empty object
 
 ## () R0 - Core Idea Working
-
 * (done) User clicks a manual income button
 * (done) The Manual income button can be upgraded
 * (done) The user can buy and upgrade auto clickers
@@ -17,17 +25,12 @@
 * (done) start a game state
 * (done) rename state global to save
 * (done) load save in boot state and set it to the registry
-
+* (done) have boot state define an egg global that can be used to reset the game
+* (done) level cap for manual upgrades
 * () have a 5 x 7 font
-* () start a lib folder with /lib/save to hold save state manager code
-* () upgrades object in save state can start out as an empty object
 
-* () have boot state define an egg global that can be used to cheat
 
-* () add button returns a group object with graphics and bitmap text as children
 
-* () new state object that stores values that ca be found from save data such as cash
-* () cash and upgrade costs do not need to be stored in the save state
-* () time does not need to be stored in an auto clicker object
+
 
 

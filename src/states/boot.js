@@ -1,27 +1,19 @@
 import { Game } from './game.js';
 
-
 const create_state = ( date = new Date() ) => {
     return {
         cash: 0.00,
         upgrade_costs: 0.00,
         clicks: [
-            [1, 250000]
-            //[1, 2.25]
-            //[1, 12191025.55]
+            [2, Math.pow(10, 9) ],
+            [8, Math.pow(10, 8) ],
+            [5, Math.pow(10, 7) ],
+            [1, 927023.07]
         ],
-        upgrades: {
-            manual: 0,
-            ac0 : 0, ac1 : 0, ac2 : 0, ac3 : 0, ac4 : 0, ac5 : 0, ac6 : 0, ac7 : 0, ac8 : 0, ac9 : 0
-        },
-        auto_clickers: [
-            //{ time:       7500, per: 0, last_update: date.getTime() },
-        ]
+        upgrades: { manual: 0, ac0 : 30, ac1 : 30, ac2 : 30, ac3 : 30, ac4 : 30, ac5 : 30, ac6 : 30, ac7 : 30, ac8 : 30, ac9 : 30 },
+        auto_clickers: [ /*{ time:       7500, per: 0, last_update: date.getTime() } */ ]
     };
 };
-
-//const state_default = create_state();
-
 
 class Boot extends Phaser.Scene {
 
@@ -31,7 +23,6 @@ class Boot extends Phaser.Scene {
     }
     
     preload(){
-        // FONT
         this.load.bitmapFont('min_3px_5px', 'fonts/min_3px_5px.png', 'fonts/min_3px_5px.xml');
     }
 
@@ -45,12 +36,23 @@ class Boot extends Phaser.Scene {
             save = Object.assign({}, save, obj_save);
         }
         this.registry.set('save', save);
-        console.log('save object: ',save);
-  
-  
+        
         // create additional states and start next state
         this.scene.add('Game', Game, false);
         this.scene.start('Game');
+        
+        // egg api
+        const egg = {};
+        
+        // clear local storage and restart the game
+        egg.reset = ( ) => {
+            localStorage.clear();
+            document.location.reload();
+        };
+        
+        window.egg = egg;
+
+        
     }
         
 }

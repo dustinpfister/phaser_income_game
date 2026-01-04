@@ -7,16 +7,16 @@ const MANUAL_RATES = [
 
 const UPGRADES = {
     manual : { start:        1, base: 2.00 },
-    ac0:     { start:        1, base: 1.25, rate:   0.01, time_start:   3000 },
-    ac1:     { start:      100, base: 1.50, rate:   0.05, time_start:   5000 },
-    ac2:     { start:      250, base: 1.65, rate:   0.10, time_start:   7500 },
-    ac3:     { start:      750, base: 1.85, rate:   0.25, time_start:  12000 },
-    ac4:     { start:     1250, base: 2.00, rate:   0.50, time_start:  20000 },
-    ac5:     { start:     5000, base: 2.25, rate:   1.00, time_start:  32500 },
-    ac6:     { start:    12000, base: 2.75, rate:   5.00, time_start:  48000 },
-    ac7:     { start:    25000, base: 3.00, rate:  10.00, time_start:  70000 },
-    ac8:     { start:    50000, base: 3.25, rate:  50.00, time_start: 115000 },
-    ac9:     { start:   100000, base: 3.75, rate: 100.00, time_start: 195000 }
+    ac0:     { start:        1, base: 1.10, rate:   0.01, time_start:   3000 },
+    ac1:     { start:      100, base: 1.20, rate:   0.05, time_start:   5000 },
+    ac2:     { start:      250, base: 1.30, rate:   0.10, time_start:   6500 },
+    ac3:     { start:      750, base: 1.40, rate:   0.25, time_start:  10000 },
+    ac4:     { start:     1250, base: 1.50, rate:   0.50, time_start:  15000 },
+    ac5:     { start:     5000, base: 1.60, rate:   1.00, time_start:  24500 },
+    ac6:     { start:    12000, base: 1.70, rate:   5.00, time_start:  35000 },
+    ac7:     { start:    25000, base: 1.80, rate:  10.00, time_start:  50000 },
+    ac8:     { start:    50000, base: 1.90, rate:  50.00, time_start:  75000 },
+    ac9:     { start:   100000, base: 2.00, rate: 100.00, time_start: 100000 }
 };
 
 // using my old diminishing returns method. 
@@ -25,13 +25,11 @@ const dim_return = function (number=0, mid_point=30) {
     return 1 - 1 / (number / mid_point + 1);
 };
 
-const get_upgrade_cost = ( level=1, start=10, base=2 ) => {
+const get_upgrade_cost = ( level=1, start=10, base=2, cap = 33 ) => {
+    if(level > cap){
+        return Infinity;
+    }
     return start * level + Math.pow( base, level );
-};
-
-window.reset = ( ) => {
-    localStorage.clear();
-    document.location.reload();
 };
 
 const get_per_hour = ( save, index ) => {
