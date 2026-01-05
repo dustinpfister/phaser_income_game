@@ -10,8 +10,6 @@ The core set of features that I think this should have is as follows:
 * (done) create objects that will store the current state of upgrades in a game.
 * (done) have ug_def objects that ARE NOT effected by the current upgrade level
 * (done) have ug objects that ARE effected by the current upgrade level
-
-* (    ) return a current save state string
-* (    ) apply a save state string
+* (done) return a current save state
+* (done) apply a save state
 * (    ) have a reset method that will reset the state of the upgrades to the hard coded start point
-* (    ) provide methodology to find what the cost of an upgrade is

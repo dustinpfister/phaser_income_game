@@ -1,24 +1,31 @@
 # phaser_income_game change log
 
-## () R5 - big number library
+## () R6 - big number library
 * () start a bug number library that just makes use of BigInt
 
-## () R4 - improved rendering
+## () R5 - improved rendering
 * () replace per button graphics with sprites
 
-## () R3 - improved button objects
+## () R4 - improved button objects
 * () add button returns a group object with graphics and bitmap text as children
 
-## () R2 - save only stores values that need to be saved
+## () R3 - save only stores values that need to be saved
 * () new state object that stores values that can be found from save data such as cash
 * () cash and upgrade costs do not need to be stored in the save state
 * () time does not need to be stored in an auto clicker object
 
-## () R1 - upgrade, save, and click libs
-* (done) start a lib/upgrades to hold upgrade code
-* () start a lib/save to hold save state manager code
-* () upgrades object in save state can start out as an empty object
+## () R2 - clicks lib
+* () start a lib/assets for working with 'clicks'
 * () finish work on 5 x 7 font
+
+## () R1 - upgrade, save,  libs
+* (done) start a lib/upgrades to hold upgrade code
+* () use upgrade lib in game state
+* () start a lib/save to hold save state manager code
+* () use save lib in boot state for
+* () upgrades object in save state can start out as an empty object
+* () more work done on 5 x 7 font
+
 
 ## ( done 01/04/2026 ) R0 - Core Idea Working
 * (done) User clicks a manual income button

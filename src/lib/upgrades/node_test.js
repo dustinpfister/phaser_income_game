@@ -27,10 +27,11 @@ const up = new Upgrades({
         if(ug.type === 'ac'){
             ug.rate = config.shared.rates[ ug.type_index ];
             const time_start = config.shared.times[ ug.type_index ] * 1000;
-            ug.time =  ( 1 - Upgrades.dim_return(level, 30) ) * time_start; 
+            ug.time =  Math.ceil(( 1 - Upgrades.dim_return(level, 30) ) * time_start); 
         }
     }
 });
 
-console.log( up.objects );
-//console.log( up.get_ug_def( up.objects.ac6 ) );
+up.save_load({ mc0: 7, ac0: 5, ac1: 3 })
+console.log( up.save_get() );
+

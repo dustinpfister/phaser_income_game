@@ -30,6 +30,9 @@ class Boot extends Phaser.Scene {
         const save_str = localStorage.getItem('income_game_save');
         if(save_str){
             const obj_save = JSON.parse( save_str );
+            
+            console.log(obj_save)
+            
             save = Object.assign({}, save, obj_save);
         }
         this.registry.set('save', save);
