@@ -1,37 +1,36 @@
-import { Upgrades } from '../lib/upgrades/upgrades.js';
+const MANUAL_RATES = [
+    0.05, 0.10, 0.25, 0.50, 0.75, 
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 
+    12, 15, 
+    20, 25, 30, 35, 40, 45, 50, 55, 60, 64, 70, 75, 80, 85, 90, 95, 100
+];
 
-const up = new Upgrades({
-    shared: {
-        cap: 30,
-        rates: [0.01,0.05,0.10,0.25,0.50,1,5,10,50,100],
-        times: [3,5,6.5,10,15,24.5,35,50,57,100]
-    },
-    upgrades: {
-        mc0: { start:      1, base: 2.00 },
-        ac0: { start:      1, base: 2.00 }, ac1: { start:   100, base: 2.00 }, ac2: { start:   250, base: 2.00 }, 
-        ac3: { start:    750, base: 2.00 }, ac4: { start:  1250, base: 2.00 }, ac5: { start:  5000, base: 2.00 }, 
-        ac6: { start:  12000, base: 2.00 }, ac7: { start: 25000, base: 2.00 }, ac8: { start: 50000, base: 2.00 }, 
-        ac9: { start: 100000, base: 2.00 }
-    },
-    get_cost: function( ug, level ) {
-        const config = this.config;
-        if(level > config.shared.cap){
-            return Infinity;
-        }
-        const ug_def = config.upgrades[ug.key];
-        return ug_def.start * level + Math.pow( ug_def.base, level );
-    },
-    for_level: function ( ug, level, config ) {
-        if(ug.type === 'mc'){
-            ug.rate = config.shared.rates[ ug.level ];
-        }
-        if(ug.type === 'ac'){
-            ug.rate = config.shared.rates[ ug.type_index ];
-            const time_start = config.shared.times[ ug.type_index ] * 1000;
-            ug.time =  Math.ceil(( 1 - Upgrades.dim_return(level, 30) ) * time_start); 
-        }
+const UPGRADES = {
+    manual : { start:        1, base: 2.00 },
+    ac0:     { start:        1, base: 1.10, rate:   0.01, time_start:   3000 },
+    ac1:     { start:      100, base: 1.20, rate:   0.05, time_start:   5000 },
+    ac2:     { start:      250, base: 1.30, rate:   0.10, time_start:   6500 },
+    ac3:     { start:      750, base: 1.40, rate:   0.25, time_start:  10000 },
+    ac4:     { start:     1250, base: 1.50, rate:   0.50, time_start:  15000 },
+    ac5:     { start:     5000, base: 1.60, rate:   1.00, time_start:  24500 },
+    ac6:     { start:    12000, base: 1.70, rate:   5.00, time_start:  35000 },
+    ac7:     { start:    25000, base: 1.80, rate:  10.00, time_start:  50000 },
+    ac8:     { start:    50000, base: 1.90, rate:  50.00, time_start:  75000 },
+    ac9:     { start:   100000, base: 2.00, rate: 100.00, time_start: 100000 }
+};
+
+// using my old diminishing returns method. 
+// https://dustinpfister.github.io/2021/07/28/js-function-diminishing-returns/
+const dim_return = function (number=0, mid_point=30) {
+    return 1 - 1 / (number / mid_point + 1);
+};
+
+const get_upgrade_cost = ( level=1, start=10, base=2, cap = 33 ) => {
+    if(level > cap){
+        return Infinity;
     }
-});
+    return start * level + Math.pow( base, level );
+};
 
 const get_per_hour = ( save, index ) => {
     const ac = save.auto_clickers[index];
@@ -73,12 +72,12 @@ const tabulate_clicks = (save) => {
         return acc + count * amount_per;
     }, 0);
 };
-/*
+
 const get_total_upgrades_cost = (save, key='manual') => {
     let cost = 0;
     let level = save.upgrades[ key ];
     while(level > 0){
-        //cost += get_upgrade_cost( level , UPGRADES[key].start, UPGRADES[key].base );
+        cost += get_upgrade_cost( level , UPGRADES[key].start, UPGRADES[key].base );
         level -= 1;
     }
     return cost;
@@ -93,7 +92,6 @@ const tabulate_upgrade_costs = (save) => {
     }
     return cost;
 }
-*/
 
 const clamp_cash = function(cash=0, min=-99999999999.99, max=999999999999.99){
     if(cash < min){ return min; }
@@ -118,8 +116,14 @@ const set_graphics_interactive = (gr, x=0, y=0, width=128, height=64) => {
     });
 };
 
+
 class Game extends Phaser.Scene {
 
+    constructor (config) {
+        super(config);
+        this.key = 'Game';
+    }
+    
     add_button ( suffix='', x=0, y=0, w=200, h=64, font_size=25, dx=0, dy=0 ) {
         const gr = this.add.graphics();
         gr.x = x; gr.y = y;
@@ -130,33 +134,27 @@ class Game extends Phaser.Scene {
         text.setScrollFactor(0, 0);
         return gr;
     }
-
-    constructor (config) {
-        super(config);
-        this.key = 'Game';
-    }
-    
     
     create () {
-        const state = this;
-    
+        const state2 = this;
+        
         // create main display objects
         const gr_main = this.add.graphics();
         gr_main.setName('graph_main');
         const line_main = this.add.bitmapText( 0, 0, 'min_5px_7px', '', 25);
         line_main.setName('text_main');
         line_main.setScrollFactor(0, 0);
-        
+            
         // create manual display objects
         const gr_ma = this.add_button('manual', 640 - 175 - 25, 100, 175, 64);
         gr_ma.on('pointerdown', ()=>{
-            state.manual_work();
+            state2.manual_work();
         });
         
-                // create manual_upgrade display objects
+        // create manual_upgrade display objects
         const gr_mu = this.add_button('manual_upgrade', 640 - 175 - 25, 200, 175, 64);
         gr_mu.on('pointerdown', ()=>{
-            state.manual_upgrade();
+            state2.manual_upgrade();
         });
         
         // create auto_clicker display objects
@@ -168,27 +166,54 @@ class Game extends Phaser.Scene {
             const gr_ac = this.add_button('ac' + i, 25, 100 + (25 + 10) * i, 400, 25, 22, 5, 5);
             (function(i_ac){
                 gr_ac.on('pointerdown', () => {
-                    state.auto_clicker_upgrade( i_ac );
+                    state2.auto_clicker_upgrade( i_ac );
                 });
             }(i))
             i += 1;
         }    
-
     }
     
     manual_work () {
-        console.log('this will need to be updated to use new upgrades system');
+        const save = this.registry.get('save');
+        const rate = MANUAL_RATES[ save.upgrades.manual ];
+        update_click_rate(save, rate, 1);
     }
     
     manual_upgrade () {
         console.log('manual upgrade requested');
+        const save = this.registry.get('save');
+        const level_current = save.upgrades.manual;
+        const level_next = level_current + 1;
+        const upgrade_cost = get_upgrade_cost( level_next, UPGRADES.manual.start, UPGRADES.manual.base );
+        if( save.cash >= upgrade_cost ){
+            save.upgrades.manual = level_next;
+            console.log('upgrade successful!');
+        }
+        if( save.cash < upgrade_cost ){
+            console.log('need more money to upgrade');
+        }
     }
     
     auto_clicker_upgrade (index=0) {
-    
+        console.log('auto clicker upgrade requested for ac index: ' + index);
+        const save = this.registry.get('save');
+        const key = 'ac' + index;
+        const level_current = save.upgrades[key];
+        const level_next = level_current + 1;
+        const upgrade_cost = get_upgrade_cost( level_next, UPGRADES[key].start, UPGRADES[key].base );
+        if( save.cash >= upgrade_cost ){
+            save.upgrades[key] = level_next;
+            if(level_current === 0){
+                save.auto_clickers[index].last_update = new Date().getTime();
+            }
+            console.log('upgrade successful!');
+        }
+        if( save.cash < upgrade_cost ){
+            console.log('need ' + upgrade_cost + ' to upgrade');
+        }
     }
     
-        render_main () {
+    render_main () {
         const save = this.registry.get('save');
         const graph = this.children.getByName('graph_main');
         graph.fillStyle(0xafafaf);
@@ -204,7 +229,7 @@ class Game extends Phaser.Scene {
     }
     
     render_auto_clickers () {
-        const state = this;
+        const state2 = this;
         const save = this.registry.get('save');
         const bar_width = 400;
         const bar_height = 25;
@@ -215,9 +240,12 @@ class Game extends Phaser.Scene {
         while(i < max){
             const ac = save.auto_clickers[i];
             const key = 'ac' + i;
-            const graph = state.children.getByName('graph_ac' + i);
-            const text = state.children.getByName('text_ac' + i);  
+            const uc = save.upgrades[key];
+            const ug = UPGRADES[key];
+            const graph = state2.children.getByName('graph_ac' + i);
+            const text = state2.children.getByName('text_ac' + i);  
             const y = start_y + ( bar_height + spacing ) * i;
+            const upgrade_cost = get_upgrade_cost( uc + 1, UPGRADES[key].start, UPGRADES[key].base );
             graph.clear();
             const w = bar_width * ac.per;
             graph.fillStyle(0xafafaf);
@@ -226,6 +254,8 @@ class Game extends Phaser.Scene {
             graph.fillStyle(0x00ff00);
             graph.fillRect(0, 0, w, bar_height);
             graph.strokeRect(0, 0, w, bar_height);   
+            text.text = format_cash(upgrade_cost, 15) + ' - ' +
+                ug.rate + ' ( ' + get_per_hour( save, i ).toFixed(2) + '/hour) ' + Math.floor(ac.time);
             text.setCharacterTint(0, text.text.length, true, 0xffffff);  
             text.setDropShadow(1, 1, 0x2a2a2a, 1);
             i += 1;
@@ -238,6 +268,8 @@ class Game extends Phaser.Scene {
         const text = this.children.getByName('text_manual');
         graph.fillStyle(0xafafaf);
         graph.fillRect(0, 0, 175, 64);
+        const level = save.upgrades.manual;
+        text.text = 'Manual Work\n\nlv ' + level  + ' (' + format_cash(MANUAL_RATES[level], 7) + ')';
         text.setCharacterTint(0, text.text.length, true, 0xffffff);  
         text.setDropShadow(1, 1, 0x2a2a2a, 1);   
     }
@@ -248,10 +280,14 @@ class Game extends Phaser.Scene {
         const text = this.children.getByName('text_manual_upgrade');
         graph.fillStyle(0xafafaf);
         graph.fillRect(0, 0, 175, 64);
+        const level_current = save.upgrades.manual;
+        const level_next = level_current + 1;
+        const upgrade_cost = get_upgrade_cost( level_next, UPGRADES.manual.start, UPGRADES.manual.base );
+        text.text = 'Upgrade Manual \n\n ' + format_cash( upgrade_cost, 10 ) + '';
         text.setCharacterTint(0, text.text.length, true, 0xffffff);  
         text.setDropShadow(1, 1, 0x2a2a2a, 1);   
     }
-
+    
     update_auto_clickers () {
         const save = this.registry.get('save');
         const now = new Date();
@@ -259,6 +295,31 @@ class Game extends Phaser.Scene {
         const len_ac = 10;
         while(i_ac < len_ac){
             let ac = save.auto_clickers[i_ac];
+            const ug = UPGRADES[ 'ac' + i_ac  ]
+            const uc = save.upgrades['ac' + i_ac];
+          
+            if(!ac){
+                ac = save.auto_clickers[i_ac] = {};
+                ac.time = ug.time_start;
+                ac.last_update = new Date().getTime();
+            }
+          
+            ac.time = ( 1 - dim_return(uc, 30) ) * ug.time_start; 
+            
+            if(uc <= 0){
+               ac.per = 0;
+            }
+            if(uc > 0){
+                const lt = new Date( ac.last_update ).getTime();
+                const ms = now.getTime() - lt;
+                ac.per = ms / ac.time;
+                if(ac.per >= 1){
+                    ac.last_update = now.getTime() - ( ac.per % 1 ) * ac.time;
+                    const per = Math.floor( ac.per );
+                    update_click_rate(save, ug.rate, per);
+                    ac.per = 1;
+                }
+            }
             i_ac += 1;
         }
     }
@@ -270,18 +331,19 @@ class Game extends Phaser.Scene {
         if(now - this.lt >= 150){
             this.update_auto_clickers();       
             save.cash = tabulate_clicks(save);
-            save.upgrade_costs = 0; //tabulate_upgrade_costs(save);
+            save.upgrade_costs = tabulate_upgrade_costs(save);
             save.cash = save.cash - save.upgrade_costs;
             save.cash = clamp_cash(save.cash);
             
-            //localStorage.setItem('income_game_save', JSON.stringify( save ) );
+            localStorage.setItem('income_game_save', JSON.stringify( save ) );
             this.render_main();
             this.render_manual_button();
             this.render_manual_upgrade_button();
             this.render_auto_clickers();
             this.lt = now;
         }
-    }   
+    }
+        
 }
 
 export { Game }

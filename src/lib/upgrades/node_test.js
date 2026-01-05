@@ -13,14 +13,15 @@ const up = new Upgrades({
         ac6: { start:  12000, base: 2.00 }, ac7: { start: 25000, base: 2.00 }, ac8: { start: 50000, base: 2.00 }, 
         ac9: { start: 100000, base: 2.00 }
     },
-    get_cost: ( ug, level, config ) => {
+    get_cost: function( ug, level, config ) {
+        const config = this.config;
         if(level > config.shared.cap){
             return Infinity;
         }
         const ug_def = config.upgrades[ug.key];
         return ug_def.start * level + Math.pow( ug_def.base, level );
     },
-    for_level: ( ug, level, config ) => {
+    for_level: function ( ug, level, config ) {
         if(ug.type === 'mc'){
             ug.rate = config.shared.rates[ ug.level ];
         }
@@ -32,6 +33,7 @@ const up = new Upgrades({
     }
 });
 
-up.save_load({ mc0: 7, ac0: 5, ac1: 3 })
+up.save_load({ mc0: 7, ac0: 5, ac1: 3 });
+//up.reset();
 console.log( up.save_get() );
 

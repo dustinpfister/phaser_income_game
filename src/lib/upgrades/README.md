@@ -12,4 +12,3 @@ The core set of features that I think this should have is as follows:
 * (done) have ug objects that ARE effected by the current upgrade level
 * (done) return a current save state
 * (done) apply a save state
-* (    ) have a reset method that will reset the state of the upgrades to the hard coded start point

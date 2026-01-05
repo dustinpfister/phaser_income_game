@@ -15,9 +15,7 @@ class Upgrades {
             ug.index = ik;
             ug.type = key.match(/\D+/)[0];
             ug.type_index = parseInt(key.match(/\d+/)[0]);
-            
-            this.setUG(ug, 0);
-            
+            this.setUG(ug, 0);          
             ik += 1;
         }
     }
@@ -29,6 +27,15 @@ class Upgrades {
     }
 
     get_cost (ug, level, config) { return 0; }
+
+    reset () {
+        const keys = Object.keys(this.objects);
+        let i = 0;
+        while( i < keys.length ){
+            this.setUG( this.objects[ keys[i] ], 0 );
+            i += 1;
+        }
+    }
 
     save_load (save={}) {
         const keys = Object.keys(this.objects);
@@ -58,9 +65,19 @@ class Upgrades {
 
     setUG (ug, level=0) {
         ug.level = level;
-        ug.cost = this.get_cost( ug, ug.level + 1, this.config );
+        ug.cost = this.get_cost( ug, ug.level + 1 );
         this.for_level(ug, ug.level, this.config );        
         this.objects[ug.key] = ug;
+    }
+
+    tabulate_cost () {
+        let cost = 0;
+        let level = this.objects[key].level;
+        while(level > 0){
+            cost += this.get_cost();
+            level -= 1;
+        }
+        return cost;
     }
 
     // based on what I have for a diminishing-returns method. 

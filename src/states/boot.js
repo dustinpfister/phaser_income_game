@@ -1,4 +1,4 @@
-import { Game } from './game.js';
+import { Game } from './game_old.js';
 
 const create_state = ( date = new Date() ) => {
     return {
