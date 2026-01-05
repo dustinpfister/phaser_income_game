@@ -5,12 +5,9 @@ const create_state = ( date = new Date() ) => {
         cash: 0.00,
         upgrade_costs: 0.00,
         clicks: [
-            [2, Math.pow(10, 9) ],
-            [8, Math.pow(10, 8) ],
-            [5, Math.pow(10, 7) ],
-            [1, 927023.07]
+            //[1, 10000]
         ],
-        upgrades: { manual: 0, ac0 : 30, ac1 : 30, ac2 : 30, ac3 : 30, ac4 : 30, ac5 : 30, ac6 : 30, ac7 : 30, ac8 : 30, ac9 : 30 },
+        upgrades: { manual: 0, ac0 : 0, ac1 : 0, ac2 : 0, ac3 : 0, ac4 : 0, ac5 : 0, ac6 : 0, ac7 : 0, ac8 : 0, ac9 : 0 },
         auto_clickers: [ /*{ time:       7500, per: 0, last_update: date.getTime() } */ ]
     };
 };

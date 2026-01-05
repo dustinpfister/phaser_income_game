@@ -328,7 +328,7 @@ class Game extends Phaser.Scene {
     update () {
         const save = this.registry.get('save');
         const now = new Date();
-        if(now - this.lt >= 100){
+        if(now - this.lt >= 150){
             this.update_auto_clickers();       
             save.cash = tabulate_clicks(save);
             save.upgrade_costs = tabulate_upgrade_costs(save);

@@ -1,5 +1,11 @@
 # phaser_income_game change log
 
+## () R5 - big number library
+* () start a bug number library that just makes use of BigInt
+
+## () R4 - improved rendering
+* () replace per button graphics with sprites
+
 ## () R3 - improved button objects
 * () add button returns a group object with graphics and bitmap text as children
 
@@ -9,8 +15,8 @@
 * () time does not need to be stored in an auto clicker object
 
 ## () R1 - upgrade, save, and click libs
+* (done) start a lib/upgrades to hold upgrade code
 * () start a lib/save to hold save state manager code
-* () start a lib/upgrades to hold upgrade code
 * () upgrades object in save state can start out as an empty object
 * () finish work on 5 x 7 font
 
