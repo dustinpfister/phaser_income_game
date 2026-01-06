@@ -1,5 +1,40 @@
 # phaser_income_game change log
 
+```
+// fun little code snipit that shows how much money I would have if
+// a certain fixed amount of money per month such as 250 was deposited
+// into a cash brokerage account, and a certain return such as 3.75 % was 
+// applyed on the current total for each month as well
+{
+    const df = new Date(1983, 4);
+    const dt = new Date();
+    const per_month = 50;
+    const yeild = 0.07 / 100;
+    
+    const month_diff = function(df, dt) {
+        return dt.getMonth() - df.getMonth() +  (12 * ( dt.getFullYear() - df.getFullYear() ) )
+    };
+    
+    const formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+    const to_cash = function( cash=0 ){
+        return formatter.format( cash )
+    };
+
+    const month_ct = month_diff(df, dt);
+    let i = 0, deposits=0, total=0;
+    while(i < month_ct){
+        deposits += per_month;
+        total += deposits;
+        const gains = total * ( yeild / 12);
+        total += gains;
+        console.log(i, to_cash( deposits), to_cash( gains ), to_cash( total ) );
+        i += 1;
+    }
+}
+
+```
+
+
 ## () R6 - big number library
 * () start a bug number library that just makes use of BigInt
 
